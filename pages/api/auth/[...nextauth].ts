@@ -4,9 +4,16 @@ import FacebookProvider from "next-auth/providers/facebook"
 import GithubProvider from "next-auth/providers/github"
 import TwitterProvider from "next-auth/providers/twitter"
 import Auth0Provider from "next-auth/providers/auth0"
-import AzureADProvider from "next-auth/providers/azure-ad";
+import AzureADProvider from "next-auth/providers/azure-ad"
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
+
+const OIDC_ID_SCOPE = "openid"
+const OIDC_EMAIL_SCOPE = "email"
+const OIDC_PROFILE_SCOPE = "profile"
+const OIDC_REFRESH_SCOPE = "offline_access"
+// https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent
+const MS_GRAPH_USER_READ_SCOPE = "User.Read" // equivalent to https://graph.microsoft.com/User.Read
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -57,14 +64,18 @@ export default NextAuth({
       tenantId: process.env.AZURE_AD_TENANT_ID,
       authorization: {
         params: {
-          scope: "openid"
+          scope: `${OIDC_ID_SCOPE} \
+                  ${OIDC_PROFILE_SCOPE} \
+                  ${OIDC_REFRESH_SCOPE} \
+                  ${MS_GRAPH_USER_READ_SCOPE}`
         }
       },
       profile(idTokenPayload, tokens) {
         // 'tokens' is the data return from the token_endpoint using the authorization code request
         // console.log("access_token:", tokens.access_token)
+        // console.log("refresh_token:", tokens.refresh_token)
         // console.log("id_token:", tokens.id_token)
-        console.log("idTokenPayload", idTokenPayload)
+        // console.log("idTokenPayload", idTokenPayload)
         const user = {
           // This object is exact same as the argument 'user' of following callbacks signin() and jwt()
           id: idTokenPayload.sub,
