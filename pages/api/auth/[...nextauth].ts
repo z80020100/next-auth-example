@@ -79,6 +79,7 @@ export default NextAuth({
         const user = {
           // This object is exact same as the argument 'user' of following callbacks signin() and jwt()
           id: idTokenPayload.sub,
+          name: idTokenPayload.name,
         }
         return user
       },
