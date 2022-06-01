@@ -60,6 +60,12 @@ export default NextAuth({
           scope: "openid"
         }
       },
+      profile(profile) {
+        console.log("profile", profile)
+        return {
+          id: profile.sub,
+        }
+      },
     }),
   ],
   theme: {
