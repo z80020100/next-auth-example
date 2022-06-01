@@ -72,9 +72,21 @@ export default NextAuth({
     colorScheme: "light",
   },
   callbacks: {
-    async jwt({ token }) {
-      token.userRole = "admin"
+    async signIn({ user, account, profile, email, credentials }) {
+      // console.log("signIn")
+      return true
+    },
+    async redirect({ url, baseUrl }) {
+      // console.log("redirect")
+      return baseUrl
+    },
+    async jwt({ token, user, account, profile, isNewUser }) {
+      // console.log("jwt")
       return token
     },
+    async session({ session, user, token }) {
+      // console.log("session")
+      return session
+    }
   },
 })
