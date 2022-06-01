@@ -60,11 +60,16 @@ export default NextAuth({
           scope: "openid"
         }
       },
-      profile(profile) {
-        console.log("profile", profile)
-        return {
-          id: profile.sub,
+      profile(idTokenPayload, tokens) {
+        // 'tokens' is the data return from the token_endpoint using the authorization code request
+        // console.log("access_token:", tokens.access_token)
+        // console.log("id_token:", tokens.id_token)
+        console.log("idTokenPayload", idTokenPayload)
+        const user = {
+          // This object is exact same as the argument 'user' of following callbacks signin() and jwt()
+          id: idTokenPayload.sub,
         }
+        return user
       },
     }),
   ],
