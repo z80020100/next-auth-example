@@ -124,10 +124,17 @@ export default NextAuth({
     },
     async jwt({ token, user, account, profile, isNewUser }) {
       // console.log("jwt")
+      for (let key in user) {
+        token[key] = user[key]
+      }
       return token
     },
     async session({ session, user, token }) {
       // console.log("session")
+      session.user.givenName = token.givenName
+      session.user.surname = token.surname
+      session.user.department = token.department
+      session.user.jobTitle = token.jobTitle
       return session
     }
   },
