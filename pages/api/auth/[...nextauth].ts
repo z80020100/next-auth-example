@@ -15,6 +15,8 @@ const OIDC_REFRESH_SCOPE = "offline_access"
 // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent
 const MS_GRAPH_USER_READ_SCOPE = "User.Read" // equivalent to https://graph.microsoft.com/User.Read
 
+const MS_GRAPH_USER_PROFILE_EP = "https://graph.microsoft.com/v1.0/me"
+
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
@@ -70,16 +72,39 @@ export default NextAuth({
                   ${MS_GRAPH_USER_READ_SCOPE}`
         }
       },
-      profile(idTokenPayload, tokens) {
+      async profile(idTokenPayload, tokens) {
         // 'tokens' is the data return from the token_endpoint using the authorization code request
         // console.log("access_token:", tokens.access_token)
         // console.log("refresh_token:", tokens.refresh_token)
         // console.log("id_token:", tokens.id_token)
         // console.log("idTokenPayload", idTokenPayload)
-        const user = {
+        let user = {
           // This object is exact same as the argument 'user' of following callbacks signin() and jwt()
           id: idTokenPayload.sub,
           name: idTokenPayload.name,
+        }
+        // Get additional information via Microsoft Graph API
+        // https://docs.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0#properties
+        let msGraphUserProps = "displayName,givenName,surname,department,jobTitle"
+        const msGraphUserPropsSelectParam = "$select"
+        let requestUrl = MS_GRAPH_USER_PROFILE_EP
+        if (msGraphUserProps) {
+          requestUrl = `${requestUrl}?${msGraphUserPropsSelectParam}=${msGraphUserProps}`
+        }
+        const response = await fetch(requestUrl, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`,
+          },
+        })
+        if (response.ok) {
+          const result = (await response.json())
+          // console.log("result", result)
+          for (let key in result) {
+            if (key != "@odata.context") {
+              user[key] = result[key]
+            }
+          }
         }
         return user
       },
